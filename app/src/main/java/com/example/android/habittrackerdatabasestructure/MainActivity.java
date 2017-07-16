@@ -29,15 +29,7 @@ public class MainActivity extends AppCompatActivity {
         insertDummy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Create and/or open a database to read from it
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                ContentValues values = new ContentValues();
-                // No date because default date is added anyway
-                values.put(HabitEntry.COLUMN_HABIT_NAME, "Napping");
-                values.put(HabitEntry.COLUMN_HABIT_KIND, HabitEntry.HOBBY_HABIT);
-                values.put(HabitEntry.COLUMN_HABIT_DURATION, 45);
-                // Insert values into database
-                db.insert(HabitEntry.TABLE_NAME, null, values);
+                insertHabit("Napping", 2, 60);
                 displayDatabaseInfo();
             }
         });
@@ -48,27 +40,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to display the table content on the screen to make testing the db functions easier
     private void displayDatabaseInfo() {
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        // A HabitDbHelper is instantiated to access the database
         HabitDbHelper dbHelper = new HabitDbHelper(this);
-        // Create a String that tells the Cursor which columns it should take into account
-        String[] projection = {
-                HabitEntry._ID,
-                HabitEntry.COLUMN_HABIT_DATE,
-                HabitEntry.COLUMN_HABIT_NAME,
-                HabitEntry.COLUMN_HABIT_KIND,
-                HabitEntry.COLUMN_HABIT_DURATION,
-        };
-        // Create a new Cursor object
-        Cursor cursor = db.query(
-                HabitEntry.TABLE_NAME,
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null);
+        // Call the queryAllHabits() method to create a new cursor
+        Cursor cursor = queryAllHabits();
 
         TextView displayView = (TextView) findViewById(R.id.show_table);
 
@@ -109,6 +83,42 @@ public class MainActivity extends AppCompatActivity {
             // Close the cursor to release all its resources and make it invalid
             cursor.close();
         }
+    }
+
+    private void insertHabit(String habitName, int habitKind, int habitWeight){
+        // Create and/or open a database to read from it
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        // No date because default date is added anyway
+        values.put(HabitEntry.COLUMN_HABIT_NAME, habitName);
+        values.put(HabitEntry.COLUMN_HABIT_KIND, habitKind);
+        values.put(HabitEntry.COLUMN_HABIT_DURATION, habitWeight);
+        // Insert values into database
+        db.insert(HabitEntry.TABLE_NAME, null, values);
+    }
+
+    public Cursor queryAllHabits(){
+        // Create and/or open a database to read from it
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        // Create a String that tells the Cursor which columns it should take into account
+        String[] projection = {
+                HabitEntry._ID,
+                HabitEntry.COLUMN_HABIT_DATE,
+                HabitEntry.COLUMN_HABIT_NAME,
+                HabitEntry.COLUMN_HABIT_KIND,
+                HabitEntry.COLUMN_HABIT_DURATION,
+        };
+        // Create a new Cursor object
+        Cursor cursor = db.query(
+                HabitEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        return cursor;
     }
 
 }
